@@ -1,0 +1,24 @@
+{
+  "name": "cli2text_specifications",
+  "version": "1.0.0",
+  "description": "📋 Le README présenté ci-dessous décrit un projet conceptuel qui n'a pas encore été développé.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gladrat/cli2text_specifications.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Gladrat/cli2text_specifications/issues"
+  },
+  "homepage": "https://github.com/Gladrat/cli2text_specifications#readme",
+  "type": "module",
+  "dependencies": {
+    "chalk": "^5.4.1"
+  }
+}

@@ -1,0 +1,408 @@
+📄 README.md
+   Chemin : README.md
+   Contenu :
+# 🛠️ Projet `Node.js`
+
+📋 Le README présenté ci-dessous décrit un projet conceptuel qui n'a pas encore été développé.  
+
+🗺️ Votre mission consiste à créer ce projet en implémentant toutes les fonctionnalités spécifiées, en respectant les détails techniques et les règles de fonctionnement énoncées. Il s'agit de coder un outil Node.js complet, capable d'analyser les répertoires, de générer une représentation structurée de leur contenu, et de produire une sortie formatée conforme aux attentes décrites.  
+
+✅ Assurez-vous de suivre **précisément les instructions** pour garantir que le projet final correspond au fonctionnement attendu.  
+
+📊 Pendant le développement, vous pouvez tester l'outil sur le dossier ``./src`` fourni afin de vérifier qu'il fonctionne correctement..
+
+# Node.js Directory Processor - **cli2text** 🚀
+
+This Node.js project provides a command-line tool for recursively processing directories and generating a structured representation of their contents. It is designed to exclude unnecessary files, format file sizes for readability, and produce outputs suitable for further analysis or reporting.
+
+## 🌟 How It Works
+
+1. **Scan the Current Directory**: The tool scans the directory from where the script is executed.
+2. **Skip Ignored Items**: Excluded files and directories are skipped based on the `IGNORE` array.
+3. **Log and Save**: Outputs the directory structure to the console and writes it to `output.txt` in the current directory.
+
+## ✨ Features
+
+- **Recursive Directory Traversal**: Efficiently processes all files and subdirectories in the current directory.
+- **Exclusion Rules**: Skips predefined files and directories like `node_modules` and `.git` to focus on relevant content.
+- **Human-Readable File Sizes**: Converts raw byte sizes into readable units (e.g., KB, MB).
+- **Automated Output**: Always generates the output in an `output.txt` file in the current directory.
+- **Colorized CLI Output**: Uses `chalk` to display directory and file names in a visually appealing manner.
+
+## 🛠️ Prerequisites
+
+Before using this tool, ensure that you have the following installed on your system:
+
+- [Node.js](https://nodejs.org/) (v16 or later)
+- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+
+## 🚀 Installation
+
+1. Clone this repository:
+
+   ```bash
+   git clone <repository-url>
+   cd <repository-folder>
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+   Or, if using Yarn:
+
+   ```bash
+   yarn install
+   ```
+
+## 🎯 Usage
+
+### Running the Tool
+
+Execute the script with Node.js. No arguments are required; the tool processes the current directory and automatically generates an `output.txt` file.
+
+```bash
+node cli2text.js
+```
+
+### Example Output *
+
+- **Directories** are displayed with a `📂` icon in green.
+- **Files** include their names and sizes, formatted for readability, displayed in green with a `📄` icon.
+- **Indented Structure** reflects the hierarchy of the directory tree.
+
+```text
+File and folder tree for : ./
+
+📄 cli2output.js
+📂 demo
+   📄 data.txt
+   📂 data_1
+      📄 data_1.csv
+📄 index.html
+📄 index.js
+
+Compilation completed. Content saved in "output.txt"
+```
+
+\* Colors are not displayed in README.md example
+
+### Exclusion Rules
+
+By default, the following files and directories are ignored:
+
+- `node_modules`
+- `.git`
+- `package.json`
+- `package-lock.json`
+- `output.txt`
+
+To exclude additional files or directories, update the `IGNORE` array in `cli2text.js`:
+
+```javascript
+const IGNORE = [
+  "node_modules",
+  ".git",
+  "package.json",
+  "package-lock.json",
+  "output.txt",
+  // Add more files/directories here
+];
+```
+
+## 📄 Code Overview
+
+### Key Functions
+
+#### `formatSize(bytes)`
+
+Converts a byte value into human-readable units (e.g., KB, MB).
+
+#### `processTree(directory, indent, compiledContent)`
+
+Traverses the directory structure recursively:
+- Logs directories and files to the console.
+- Appends structured data to `compiledContent`.
+- Writes the final output to `output.txt` in the current directory.
+
+### Dependencies
+
+- **`fs/promises`**: Handles asynchronous file system operations.
+- **`path`**: Constructs file and directory paths.
+- **`chalk` (vendor)**: Adds colorized output for better readability.
+
+📄 cli2text.js
+   Chemin : cli2text.js
+   Contenu :
+import fs from "node:fs/promises";
+import path from "path";
+
+// On ignore ces fichiers/dossiers
+const IGNORE = [
+  "node_modules",
+  ".git",
+  "package.json",
+  "package-lock.json",
+  "output.txt",
+];
+
+/**
+ * Lit de manière récursive le dossier et remplit deux tableaux :
+ * - structureLines : pour l’arborescence simple
+ * - fullLines : pour l’arborescence + contenu des fichiers
+ */
+async function parcourirDossier(ignoreList, directory = ".", indent = 0, structureLines = [], fullLines = []) {
+  const files = await fs.readdir(directory);
+  files.sort(); 
+  const indentation = "   ".repeat(indent);
+
+  for (const file of files) {
+    // On ignore ce qui est dans la liste
+    if (ignoreList.includes(file)) continue;
+
+    const currentPath = path.join(directory, file);
+    const stats = await fs.stat(currentPath);
+
+    if (stats.isDirectory()) {
+      // On ajoute le dossier dans les deux tableaux (structure et complet)
+      structureLines.push(`${indentation}📂 ${file}`);
+      fullLines.push(`${indentation}📂 ${file}`);
+      
+      // On descend en récursif
+      await parcourirDossier(ignoreList, currentPath, indent + 1, structureLines, fullLines);
+      
+    } else if (stats.isFile()) {
+      // On ajoute le fichier dans l’arborescence
+      structureLines.push(`${indentation}📄 ${file}`);
+      fullLines.push(`${indentation}📄 ${file}`);
+
+      // Ici, on lit son contenu pour l’ajouter dans la version complète
+      try {
+        const data = await fs.readFile(currentPath, "utf8");
+        // On rajoute un petit décalage
+        const contentIndent = "   ".repeat(indent + 1);
+        
+        fullLines.push(`${contentIndent}Chemin : ${currentPath}`);
+        fullLines.push(`${contentIndent}Contenu :\n${data}`);
+      } catch (error) {
+        fullLines.push(`   Erreur de lecture du fichier : ${currentPath}`);
+      }
+
+      // Petite ligne vide pour aérer la version complète
+      fullLines.push("");
+    }
+  }
+
+  // On retourne les deux tableaux pour qu’ils puissent être récupérés
+  return { structureLines, fullLines };
+}
+
+async function main() {
+  try {
+    // On prépare nos deux tableaux
+    let structureLines = [];
+    let fullLines = [];
+
+    // On lance la lecture
+    const { structureLines: s, fullLines: f } = await parcourirDossier(IGNORE, ".", 0, structureLines, fullLines);
+    
+    // On met à jour nos tableaux finaux
+    structureLines = s;
+    fullLines = f;
+
+    // --- 1) Affichage uniquement de l'arborescence dans la console ---
+    console.log("ARBORESCENCE DU DOSSIER :");
+    console.log(structureLines.join("\n"));
+
+    // --- 2) Écriture de l’arborescence + contenu des fichiers dans 'output.txt' ---
+    const finalOutput = fullLines.join("\n");
+    await fs.writeFile("output.txt", finalOutput, "utf8");
+    console.log("\nContenu complet (arbo + fichiers) enregistré dans 'output.txt'.");
+    
+  } catch (error) {
+    console.error("Erreur :", error);
+  }
+}
+
+main();
+
+
+📂 src
+   📂 components
+      📄 taskItem.html
+         Chemin : src\components\taskItem.html
+         Contenu :
+<li class="task-item">
+  <input type="checkbox">
+  <span>Task text here</span>
+  <button>Delete</button>
+</li>
+
+
+   📂 css
+      📄 styles.css
+         Chemin : src\css\styles.css
+         Contenu :
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #f0f0f0;
+}
+
+header {
+  background: #6200ea;
+  color: #fff;
+  text-align: center;
+  padding: 1rem;
+}
+
+.logo {
+  width: 50px;
+  height: auto;
+  display: inline-block;
+}
+
+#app {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 10px;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#task-list {
+  list-style: none;
+  padding: 0;
+}
+
+#task-form {
+  display: flex;
+  gap: 10px;
+}
+
+#task-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  background: #6200ea;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+
+      📄 themes.css
+         Chemin : src\css\themes.css
+         Contenu :
+
+
+   📂 data
+      📄 tasks.json
+         Chemin : src\data\tasks.json
+         Contenu :
+[
+  { "id": 1, "text": "Sample Task 1", "completed": false },
+  { "id": 2, "text": "Sample Task 2", "completed": true }
+]
+
+
+   📄 index.html
+      Chemin : src\index.html
+      Contenu :
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-Do List</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="assets/favicon.ico">
+</head>
+<body>
+  <header>
+    <h1>To-Do List</h1>
+    <img src="assets/logo.png" alt="App Logo" class="logo">
+  </header>
+  <main id="app">
+    <ul id="task-list"></ul>
+    <form id="task-form">
+      <input type="text" id="task-input" placeholder="Add a new task" required>
+      <button type="submit">Add Task</button>
+    </form>
+  </main>
+  <footer>
+    <p>&copy; 2025 To-Do List App</p>
+  </footer>
+  <script src="js/app.js" type="module"></script>
+</body>
+</html>
+
+
+   📂 js
+      📄 app.js
+         Chemin : src\js\app.js
+         Contenu :
+import { saveTask, getTasks } from './storage.js';
+import { renderTasks } from './dom.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const taskForm = document.getElementById('task-form');
+  const taskInput = document.getElementById('task-input');
+
+  taskForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const task = taskInput.value.trim();
+    if (task) {
+      saveTask(task);
+      taskInput.value = '';
+      renderTasks();
+    }
+  });
+
+  renderTasks();
+});
+
+
+      📄 dom.js
+         Chemin : src\js\dom.js
+         Contenu :
+import { getTasks } from './storage.js';
+
+export function renderTasks() {
+  const taskList = document.getElementById('task-list');
+  taskList.innerHTML = '';
+
+  const tasks = getTasks();
+  tasks.forEach(task => {
+    const li = document.createElement('li');
+    li.textContent = task.text;
+    taskList.appendChild(li);
+  });
+}
+
+
+      📄 storage.js
+         Chemin : src\js\storage.js
+         Contenu :
+const TASKS_KEY = 'tasks';
+
+export function saveTask(task) {
+  const tasks = getTasks();
+  tasks.push({ id: Date.now(), text: task, completed: false });
+  localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+}
+
+export function getTasks() {
+  return JSON.parse(localStorage.getItem(TASKS_KEY)) || [];
+}
+
