@@ -32,7 +32,7 @@ async function parcourirDossier(ignoreList, directory = ".", indent = 0, structu
       structureLines.push(`${indentation}📂 ${file}`);
       fullLines.push(`${indentation}📂 ${file}`);
       
-      // On descend en récursif
+      // récursif
       await parcourirDossier(ignoreList, currentPath, indent + 1, structureLines, fullLines);
       
     } else if (stats.isFile()) {
@@ -40,10 +40,10 @@ async function parcourirDossier(ignoreList, directory = ".", indent = 0, structu
       structureLines.push(`${indentation}📄 ${file}`);
       fullLines.push(`${indentation}📄 ${file}`);
 
-      // Ici, on lit son contenu pour l’ajouter dans la version complète
+      // lit son contenu pour l’ajouter dans la version complète
       try {
         const data = await fs.readFile(currentPath, "utf8");
-        // On rajoute un petit décalage
+        // petit décalage
         const contentIndent = "   ".repeat(indent + 1);
         
         fullLines.push(`${contentIndent}Chemin : ${currentPath}`);
@@ -52,7 +52,6 @@ async function parcourirDossier(ignoreList, directory = ".", indent = 0, structu
         fullLines.push(`   Erreur de lecture du fichier : ${currentPath}`);
       }
 
-      // Petite ligne vide pour aérer la version complète
       fullLines.push("");
     }
   }
@@ -63,7 +62,6 @@ async function parcourirDossier(ignoreList, directory = ".", indent = 0, structu
 
 async function main() {
   try {
-    // On prépare nos deux tableaux
     let structureLines = [];
     let fullLines = [];
 
